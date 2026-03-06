@@ -27,3 +27,6 @@ Thumbs.db
 # IDE / tools
 .cursor/
 lanhu-mcp/
+
+# Reference (local only, do not commit)
+Reference_Project/
