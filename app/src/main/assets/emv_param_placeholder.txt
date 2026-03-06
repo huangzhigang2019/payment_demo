@@ -1,0 +1,2 @@
+# Placeholder for EMV parameter files.
+# Copy emv_param.contact, paypass_param.clss_mc, capk.capk etc. from Reference_Project/JemvDemo2.0/app/src/main/assets/ or emv module assets as needed.

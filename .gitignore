@@ -1,0 +1,29 @@
+# Android / Gradle
+local.properties
+.idea/
+*.iml
+.gradle/
+build/
+app/build/
+captures/
+.externalNativeBuild/
+*.apk
+*.aab
+
+# Java
+*.class
+*.jar
+*.war
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs / temp
+*.log
+*.tmp
+*.swp
+
+# IDE / tools
+.cursor/
+lanhu-mcp/

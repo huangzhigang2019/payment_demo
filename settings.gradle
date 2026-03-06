@@ -1,0 +1,6 @@
+rootProject.name = 'paymentDemo'
+
+include ':app'
+include ':commonlib'
+include ':sdk'
+include ':emv'

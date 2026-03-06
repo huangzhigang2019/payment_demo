@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">支付Demo</string>
+    <string name="start_transaction">开始交易</string>
+    <string name="amount_hint">请输入金额</string>
+    <string name="settings">设置</string>
+    <string name="insert_tap_card">请插卡 / 挥卡 / 刷磁条</string>
+    <string name="processing">处理中…</string>
+    <string name="cancel">取消</string>
+    <string name="retry">重试</string>
+    <string name="back">返回</string>
+    <string name="trans_success">交易成功</string>
+    <string name="trans_failed">交易失败</string>
+    <string name="trans_cancelled">已取消</string>
+    <string name="trans_timeout">超时</string>
+    <string name="try_again">再试一笔</string>
+    <string name="amount_invalid">请输入有效金额（大于0）</string>
+    <string name="amount_too_large">金额超出上限</string>
+    <string name="read_card_timeout">读卡超时，请重试或返回</string>
+    <string name="read_card_init_failed">设备读卡模块未就绪或权限/so未加载</string>
+    <string name="device_not_ready">设备未就绪，请检查配置</string>
+    <string name="try_different_mode">请尝试换一种读卡方式或重试</string>
+    <string name="card_removed_retry">卡片已移开，请重新放置后重试或取消</string>
+    <string name="remove_card_prompt">请移开卡片</string>
+    <string name="read_mode_picc">请挥卡</string>
+    <string name="read_mode_icc">请插卡</string>
+    <string name="read_mode_mag">请刷磁条</string>
+    <string name="read_mode_picc_icc">请挥卡或插卡</string>
+    <string name="read_mode_picc_mag">请挥卡或刷磁条</string>
+    <string name="read_mode_icc_mag">请插卡或刷磁条</string>
+    <string name="read_mode_all">请挥卡 / 插卡 / 刷磁条</string>
+    <string name="read_mode_none">无可用读卡方式，请检查设备</string>
+</resources>

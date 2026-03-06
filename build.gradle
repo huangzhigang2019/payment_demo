@@ -1,0 +1,22 @@
+// Top-level build file for paymentDemo (001-payment-demo)
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.2.2'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        jcenter()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

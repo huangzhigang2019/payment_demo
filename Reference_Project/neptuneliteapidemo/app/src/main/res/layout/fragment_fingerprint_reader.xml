@@ -1,0 +1,168 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="16dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="16dp"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/bt_fingerOpen"
+            android:textAllCaps="false"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/fingerOpen"/>
+        <Button
+            android:id="@+id/bt_power_on"
+            android:textAllCaps="false"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/Power_on"/>
+
+        <Button
+            android:id="@+id/btn_fingerCaptureFeature"
+            android:textAllCaps="false"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/captureFeature"/>
+
+        <Button
+            android:id="@+id/btn_fingerCaptureImage"
+            android:textAllCaps="false"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/captureImage"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/btn_fingerCaptureStop"
+            android:textAllCaps="false"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/fingerStop"/>
+
+        <Button
+            android:id="@+id/btn_getNfiqScore"
+            android:textAllCaps="false"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Nfiq Score"/>
+
+        <Button
+            android:id="@+id/btn_getNfiq2Score"
+            android:textAllCaps="false"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Nfiq2 Score"/>
+
+        <Button
+            android:id="@+id/btn_close"
+            android:textAllCaps="false"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/fingerClose"/>
+
+        <Button
+            android:id="@+id/bt_power_off"
+            android:textAllCaps="false"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/Power_off"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/btn_setImageSize"
+            android:textAllCaps="false"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="@string/setImageSize"/>
+        <EditText
+            android:id="@+id/et_width"
+            android:layout_width="50dp"
+            android:text="600"
+            android:inputType="number"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:text="X"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"/>
+        <EditText
+            android:id="@+id/et_height"
+            android:text="600"
+            android:layout_width="50dp"
+            android:inputType="number"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/tv_imageSize_tips"
+            android:layout_width="170dp"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/btn_compress"
+            android:textAllCaps="false"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/compress"/>
+        <EditText
+            android:id="@+id/et_compress"
+            android:layout_width="100dp"
+            android:text="5"
+            android:inputType="number"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+        <ScrollView
+            android:id="@+id/scrollView"
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent">
+            <TextView android:id="@+id/tv_result"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </ScrollView>
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/fingerClose"/>
+    </LinearLayout>
+
+
+</LinearLayout>

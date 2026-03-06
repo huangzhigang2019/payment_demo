@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.payment.demo">
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- PAX device permissions when running on supported hardware -->
+    <uses-permission android:name="com.pax.permission.MAGCARD" />
+    <uses-permission android:name="com.pax.permission.PED" />
+    <uses-permission android:name="com.pax.permission.ICC" />
+    <uses-permission android:name="com.pax.permission.PICC" />
+
+    <application
+        android:name=".app.PaymentDemoApp"
+        android:allowBackup="true"
+        android:extractNativeLibs="true"
+        android:icon="@android:drawable/ic_menu_my_calendar"
+        android:label="@string/app_name"
+        android:roundIcon="@android:drawable/ic_menu_my_calendar"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.PaymentDemo">
+
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.PaymentDemo">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ui.ReadCardActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.ProcessingActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.ResultActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.SettingsActivity"
+            android:exported="false" />
+    </application>
+</manifest>

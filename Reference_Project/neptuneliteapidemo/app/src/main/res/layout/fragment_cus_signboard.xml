@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ ===========================================================================================
+  ~ = COPYRIGHT
+  ~          PAX Computer Technology (Shenzhen) Co., Ltd. PROPRIETARY INFORMATION
+  ~   This software is supplied under the terms of a license agreement or nondisclosure
+  ~   agreement with PAX Computer Technology (Shenzhen) Co., Ltd. and may not be copied or
+  ~   disclosed except in accordance with the terms in that agreement.
+  ~     Copyright (C) 2017-2023 PAX Computer Technology (Shenzhen) Co., Ltd. All rights reserved.
+  ~ Description: // Detail description about the function of this module,
+  ~             // interfaces with the other modules, and dependencies.
+  ~ Revision History:
+  ~ Date                         Author                        Action
+  ~ 2017/12/20                   PAX                     Create/Add/Modify/Delete
+  ~ ===========================================================================================
+  -->
+
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <TextView
+        android:id="@+id/tv_timeout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="timeout(ms):"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/et_timeout"
+        app:layout_constraintBottom_toTopOf="@id/button"
+        />
+
+    <EditText
+        android:id="@+id/et_timeout"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        app:layout_constraintBottom_toTopOf="@id/button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tv_timeout"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start SignBoard"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_timeout" />
+
+</android.support.constraint.ConstraintLayout>
