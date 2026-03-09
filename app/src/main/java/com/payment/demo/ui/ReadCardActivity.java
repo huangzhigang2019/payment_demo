@@ -40,6 +40,7 @@ public class ReadCardActivity extends AppCompatActivity {
     private long tipCent;
     private CardReaderManager cardReader;
     private boolean isFailed;
+    private boolean piccSuccessDetected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,11 +105,14 @@ public class ReadCardActivity extends AppCompatActivity {
 
     private void onDetectResult(CardReadResult result) {
         if (result.isSuccess()) {
-            Intent i = new Intent(this, CardholderConfirmActivity.class);
-            i.putExtra(CardholderConfirmActivity.EXTRA_AMOUNT_CENT, amountCent);
-            i.putExtra(CardholderConfirmActivity.EXTRA_TIP_CENT, tipCent);
-            i.putExtra(CardholderConfirmActivity.EXTRA_READ_TYPE, result.getReadType());
-            i.putExtra(CardholderConfirmActivity.EXTRA_CARD_INFO, result.getCardInfo());
+            if (result.getReadType() == com.pax.dal.entity.EReaderType.PICC.getEReaderType()) {
+                piccSuccessDetected = true;
+            }
+            Intent i = new Intent(this, ProcessingActivity.class);
+            i.putExtra(ProcessingActivity.EXTRA_AMOUNT_CENT, amountCent);
+            i.putExtra(ProcessingActivity.EXTRA_TIP_CENT, tipCent);
+            i.putExtra(ProcessingActivity.EXTRA_READ_TYPE, result.getReadType());
+            i.putExtra(ProcessingActivity.EXTRA_CARD_INFO, result.getCardInfo());
             startActivity(i);
             finish();
             return;
@@ -157,7 +161,9 @@ public class ReadCardActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        if (cardReader != null) cardReader.stopDetect();
+        // For PICC success, the reader must stay open for ClssProcess EMV transaction.
+        // EmvProcessor will close it after the transaction completes.
+        if (cardReader != null && !piccSuccessDetected) cardReader.stopDetect();
         super.onDestroy();
     }
 }

@@ -7,7 +7,7 @@
     <string name="settings">设置</string>
     <string name="insert_tap_card">请插卡 / 挥卡 / 刷磁条</string>
     <string name="processing">处理中…</string>
-    <string name="cancel">取消</string>
+    <string name="cancel">CANCEL</string>
     <string name="retry">重试</string>
     <string name="back">返回</string>
     <string name="trans_success">交易成功</string>
@@ -49,6 +49,7 @@
     <string name="tip_exceeds_limit">Tip cannot exceed 10%% of original amount</string>
     <string name="cardholder_confirm_title">Cardholder Confirm</string>
     <string name="please_confirm_card">Please confirm card number</string>
+    <string name="card_number_label">Card Number:</string>
     <string name="confirm">CONFIRM</string>
     <string name="signature_title">Signature</string>
     <string name="clear">Clear</string>

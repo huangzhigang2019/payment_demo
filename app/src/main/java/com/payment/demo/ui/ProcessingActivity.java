@@ -61,13 +61,14 @@ public class ProcessingActivity extends AppCompatActivity {
 
             PaymentDemoApp.getApp().runOnUiThread(() -> {
                 if (pr.getResultStatus() == com.payment.demo.trans.TransResultStatus.SUCCESS) {
-                    String maskedCardNo = com.payment.demo.ui.CardholderConfirmActivity.maskCardInfo(cardInfo);
-                    Intent i = new Intent(this, SignatureActivity.class);
-                    i.putExtra(SignatureActivity.EXTRA_AMOUNT_CENT, amountCent);
-                    i.putExtra(SignatureActivity.EXTRA_TIP_CENT, tipCent);
-                    i.putExtra(SignatureActivity.EXTRA_READ_TYPE, readType);
-                    i.putExtra(SignatureActivity.EXTRA_CARD_INFO, cardInfo);
-                    i.putExtra(SignatureActivity.EXTRA_MASKED_CARD_NO, maskedCardNo);
+                    String maskedCardNo = pr.getPan() != null ? pr.getPan()
+                            : com.payment.demo.ui.CardholderConfirmActivity.maskCardInfo(cardInfo);
+                    Intent i = new Intent(this, CardholderConfirmActivity.class);
+                    i.putExtra(CardholderConfirmActivity.EXTRA_AMOUNT_CENT, amountCent);
+                    i.putExtra(CardholderConfirmActivity.EXTRA_TIP_CENT, tipCent);
+                    i.putExtra(CardholderConfirmActivity.EXTRA_READ_TYPE, readType);
+                    i.putExtra(CardholderConfirmActivity.EXTRA_CARD_INFO, cardInfo);
+                    i.putExtra(CardholderConfirmActivity.EXTRA_MASKED_CARD_NO, maskedCardNo);
                     startActivity(i);
                 } else {
                     Intent i = new Intent(this, ResultActivity.class);

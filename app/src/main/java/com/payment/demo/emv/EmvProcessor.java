@@ -19,6 +19,9 @@ import com.paxsz.module.emv.process.IStatusListener;
 import com.payment.demo.app.PaymentDemoApp;
 import com.payment.demo.trans.ProcessingResult;
 import com.payment.demo.trans.TransResultStatus;
+import com.payment.demo.ui.CardholderConfirmActivity;
+
+import com.pax.jemv.clcommon.ByteArray;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -62,6 +65,7 @@ public class EmvProcessor {
             pr.setResultCode(0);
             pr.setDisplaySummary(cardInfo != null && !cardInfo.isEmpty()
                     ? "磁条卡: " + maskPan(cardInfo) : "磁条交易完成");
+            pr.setPan(CardholderConfirmActivity.maskCardInfo(cardInfo));
             return pr;
         }
 
@@ -118,9 +122,17 @@ public class EmvProcessor {
             });
             ClssProcess.getInstance().registerStatusListener(statusListener);
             tr = ClssProcess.getInstance().startTransProcess();
+            // Close PICC reader after CLSS transaction (was kept open from CardReaderManager detection)
+            try {
+                PaymentDemoApp.getApp().getDal().getPicc(com.pax.dal.entity.EPiccType.INTERNAL).close();
+            } catch (Throwable ignored) { }
         }
 
-        return mapTransResult(tr, pr);
+        mapTransResult(tr, pr);
+        if (pr.getResultStatus() == TransResultStatus.SUCCESS) {
+            populatePan(pr, readType, cardInfo);
+        }
+        return pr;
     }
 
     private boolean isIcc(int readType) {
@@ -201,34 +213,56 @@ public class EmvProcessor {
         }
     };
 
-    private ProcessingResult mapTransResult(TransResult tr, ProcessingResult pr) {
+    /** EMV 成功后填充脱敏卡号到 ProcessingResult，供 CardholderConfirm 显示 */
+    private void populatePan(ProcessingResult pr, int readType, String cardInfo) {
+        if (isIcc(readType)) {
+            try {
+                ByteArray panBuf = new ByteArray();
+                if (EmvProcess.getInstance().getTlv(0x5A, panBuf) == RetCode.EMV_OK && panBuf.data != null && panBuf.length > 0) {
+                    String panStr = com.pax.commonlib.utils.convert.ConvertHelper.getConvert()
+                            .bcdToStr(panBuf.data, panBuf.length);
+                    pr.setPan(CardholderConfirmActivity.maskCardInfo(panStr));
+                }
+            } catch (Throwable ignored) { }
+        } else {
+            try {
+                String track2 = ClssProcess.getInstance().getTrack2();
+                if (track2 != null && !track2.isEmpty()) {
+                    pr.setPan(CardholderConfirmActivity.maskCardInfo(track2));
+                }
+            } catch (Throwable ignored) { }
+        }
+    }
+
+    private void mapTransResult(TransResult tr, ProcessingResult pr) {
         if (tr == null) {
             pr.setResultStatus(TransResultStatus.FAILED);
             pr.setDisplaySummary("EMV 返回空");
-            return pr;
+            return;
         }
         pr.setResultCode(tr.getResultCode());
         int code = tr.getResultCode();
         if (code == RetCode.EMV_USER_CANCEL) {
             pr.setResultStatus(TransResultStatus.CANCELLED);
             pr.setDisplaySummary(context.getString(com.payment.demo.R.string.trans_cancelled));
-            return pr;
+            return;
         }
         if (code == RetCode.EMV_TIME_OUT) {
             pr.setResultStatus(TransResultStatus.TIMEOUT);
             pr.setDisplaySummary(context.getString(com.payment.demo.R.string.trans_timeout));
-            return pr;
+            return;
         }
         TransResultEnum e = tr.getTransResult();
         if (e == TransResultEnum.RESULT_OFFLINE_APPROVED
-                || e == TransResultEnum.RESULT_ONLINE_APPROVED) {
+                || e == TransResultEnum.RESULT_ONLINE_APPROVED
+                || e == TransResultEnum.RESULT_REQ_ONLINE) {
+            // RESULT_REQ_ONLINE: card requires online auth; demo always approves
             pr.setResultStatus(TransResultStatus.SUCCESS);
             pr.setDisplaySummary("交易成功");
         } else {
             pr.setResultStatus(TransResultStatus.FAILED);
             pr.setDisplaySummary(e != null ? e.name() : "失败(" + tr.getResultCode() + ")");
         }
-        return pr;
     }
 
     private static String maskPan(String track2) {

@@ -14,7 +14,7 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 /**
- * 持卡人确认界面。显示脱敏卡号，CANCEL 返回主界面，CONFIRM 进入 ProcessingActivity。
+ * 持卡人确认界面。显示脱敏卡号（来自 EMV 流程），CANCEL 返回主界面，CONFIRM 进入 SignatureActivity。
  */
 public class CardholderConfirmActivity extends AppCompatActivity {
 
@@ -22,6 +22,7 @@ public class CardholderConfirmActivity extends AppCompatActivity {
     public static final String EXTRA_TIP_CENT = "tip_cent";
     public static final String EXTRA_READ_TYPE = "read_type";
     public static final String EXTRA_CARD_INFO = "card_info";
+    public static final String EXTRA_MASKED_CARD_NO = "masked_card_no";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +33,7 @@ public class CardholderConfirmActivity extends AppCompatActivity {
         long tipCent = getIntent().getLongExtra(EXTRA_TIP_CENT, 0);
         int readType = getIntent().getIntExtra(EXTRA_READ_TYPE, 0);
         String cardInfo = getIntent().getStringExtra(EXTRA_CARD_INFO);
+        String maskedCardNo = getIntent().getStringExtra(EXTRA_MASKED_CARD_NO);
 
         TextView amountText = findViewById(R.id.amount_text);
         TextView cardNumberDisplay = findViewById(R.id.card_number_display);
@@ -41,17 +43,18 @@ public class CardholderConfirmActivity extends AppCompatActivity {
         df.applyPattern("$ #,##0.00");
         amountText.setText(df.format(totalDollars));
 
-        String masked = maskCardInfo(cardInfo);
+        String masked = (maskedCardNo != null && !maskedCardNo.isEmpty()) ? maskedCardNo : maskCardInfo(cardInfo);
         cardNumberDisplay.setText(masked);
 
         findViewById(R.id.btn_back).setOnClickListener(v -> onCancel());
         findViewById(R.id.btn_cancel).setOnClickListener(v -> onCancel());
         findViewById(R.id.btn_confirm).setOnClickListener(v -> {
-            Intent i = new Intent(this, ProcessingActivity.class);
-            i.putExtra(ProcessingActivity.EXTRA_AMOUNT_CENT, amountCent);
-            i.putExtra(ProcessingActivity.EXTRA_TIP_CENT, tipCent);
-            i.putExtra(ProcessingActivity.EXTRA_READ_TYPE, readType);
-            i.putExtra(ProcessingActivity.EXTRA_CARD_INFO, cardInfo);
+            Intent i = new Intent(this, SignatureActivity.class);
+            i.putExtra(SignatureActivity.EXTRA_AMOUNT_CENT, amountCent);
+            i.putExtra(SignatureActivity.EXTRA_TIP_CENT, tipCent);
+            i.putExtra(SignatureActivity.EXTRA_READ_TYPE, readType);
+            i.putExtra(SignatureActivity.EXTRA_CARD_INFO, cardInfo);
+            i.putExtra(SignatureActivity.EXTRA_MASKED_CARD_NO, masked);
             startActivity(i);
             finish();
         });
@@ -67,15 +70,28 @@ public class CardholderConfirmActivity extends AppCompatActivity {
     private static String extractPan(String cardInfo) {
         if (cardInfo == null) return null;
         String s = cardInfo.trim();
-        if (s.matches("\\d+")) return s;
-        if (s.contains("=") || s.contains("D")) {
-            int eq = s.indexOf('=');
-            int d = s.indexOf('D');
-            int end = eq >= 0 ? eq : (d >= 0 ? d : s.length());
-            String numPart = s.substring(0, end).replaceAll("\\D", "");
-            if (numPart.length() >= 13) return numPart;
+        if (s.isEmpty()) return null;
+        // 纯数字：取前16位（标准PAN长度）
+        if (s.matches("\\d+")) {
+            return s.length() >= 8 ? s.substring(0, Math.min(16, s.length())) : null;
         }
-        return s.replaceAll("\\D", "").length() >= 13 ? s.replaceAll("\\D", "") : s;
+        // Track2 格式: PAN + 'D'/'d'/'=' + 后续
+        int sep = -1;
+        int eq = s.indexOf('=');
+        int dUpper = s.indexOf('D');
+        int dLower = s.indexOf('d');
+        int d = (dUpper >= 0 && dLower >= 0) ? Math.min(dUpper, dLower)
+                : (dUpper >= 0 ? dUpper : (dLower >= 0 ? dLower : -1));
+        if (eq >= 0 || d >= 0) {
+            sep = (eq >= 0 && d >= 0) ? Math.min(eq, d) : (eq >= 0 ? eq : d);
+        }
+        if (sep >= 0) {
+            String numPart = s.substring(0, sep).replaceAll("\\D", "");
+            if (numPart.length() >= 8) return numPart.substring(0, Math.min(16, numPart.length()));
+        }
+        // 兜底：取所有数字的前16位
+        String digits = s.replaceAll("\\D", "");
+        return digits.length() >= 8 ? digits.substring(0, Math.min(16, digits.length())) : null;
     }
 
     private void onCancel() {

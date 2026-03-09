@@ -178,6 +178,7 @@ public class CardReaderManager {
                     if (info != null) {
                         result.setSuccess(true);
                         result.setReadType(EReaderType.PICC.getEReaderType());
+                        // PiccCardInfo 无 getTrack2()，PICC 的 PAN 需在 EMV 流程中获取
                         closeReaders((byte) (0x03 & mode));
                         return result;
                     }
@@ -204,10 +205,25 @@ public class CardReaderManager {
         return result;
     }
 
-    /** Only called from doPoll when readers were successfully opened. */
+    /**
+     * Selectively close readers based on flag bitmask. PICC is only closed if its bit is set,
+     * so it can remain open for the subsequent ClssProcess EMV transaction.
+     */
     private void closeReaders(byte flag) {
-        if (!readersOpened || readersClosed) return;
-        safeCloseReaders();
+        if (!readersOpened) return;
+        if ((flag & EReaderType.MAG.getEReaderType()) != 0 && mag != null) {
+            try { mag.close(); } catch (Throwable ignored) { }
+            mag = null;
+        }
+        if ((flag & EReaderType.ICC.getEReaderType()) != 0 && icc != null) {
+            try { icc.close(SLOT_ICC); } catch (Throwable ignored) { }
+            icc = null;
+        }
+        if ((flag & EReaderType.PICC.getEReaderType()) != 0 && piccInternal != null) {
+            try { piccInternal.close(); } catch (Throwable ignored) { }
+            piccInternal = null;
+        }
+        if (mag == null && icc == null && piccInternal == null) readersClosed = true;
     }
 
     /** Tolerate all native/JNI failures; never throw. Only close if we actually opened readers. */
