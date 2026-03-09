@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.pax.dal.entity.EReaderType;
@@ -16,16 +18,28 @@ import com.payment.demo.config.ConfigStatusProvider;
 import com.payment.demo.config.TerminalConfigStatus;
 import com.payment.demo.trans.CardReadResult;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Locale;
+
 /**
  * T009/T012: 读卡引导 — 显示插卡/挥卡提示，取消，超时/成功跳转.
  */
 public class ReadCardActivity extends AppCompatActivity {
     public static final String EXTRA_AMOUNT_CENT = "amount_cent";
+    public static final String EXTRA_TIP_CENT = "tip_cent";
 
     private TextView promptText;
-    private Button cancelBtn;
+    private TextView amountText;
+    private ImageView iconSwipe;
+    private ImageView iconInsert;
+    private ImageView iconTap;
+    private ImageButton backBtn;
+    private Button retryBtn;
     private long amountCent;
+    private long tipCent;
     private CardReaderManager cardReader;
+    private boolean isFailed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,11 +47,21 @@ public class ReadCardActivity extends AppCompatActivity {
         setContentView(R.layout.activity_read_card);
 
         amountCent = getIntent().getLongExtra(EXTRA_AMOUNT_CENT, 0);
+        tipCent = getIntent().getLongExtra(EXTRA_TIP_CENT, 0);
         promptText = findViewById(R.id.read_card_prompt);
-        cancelBtn = findViewById(R.id.btn_cancel);
+        amountText = findViewById(R.id.read_card_amount);
+        iconSwipe = findViewById(R.id.icon_swipe);
+        iconInsert = findViewById(R.id.icon_insert);
+        iconTap = findViewById(R.id.icon_tap);
+        backBtn = findViewById(R.id.btn_back);
+        retryBtn = findViewById(R.id.btn_retry);
 
-        updatePromptForAvailableModes();
-        cancelBtn.setOnClickListener(v -> onCancel());
+        updateAmountDisplay();
+        updateIconsForAvailableModes();
+        promptText.setText(R.string.please_swipe_insert_tap);
+
+        backBtn.setOnClickListener(v -> onBackOrCancel());
+        retryBtn.setOnClickListener(v -> startDetectAgain());
 
         cardReader = new CardReaderManager(PaymentDemoApp.getApp());
         byte modeMask = buildModeMask();
@@ -46,17 +70,50 @@ public class ReadCardActivity extends AppCompatActivity {
         });
     }
 
+    private void updateAmountDisplay() {
+        double dollars = amountCent / 100.0;
+        DecimalFormat df = (DecimalFormat) NumberFormat.getNumberInstance(Locale.US);
+        df.applyPattern("$ #,##0.00");
+        amountText.setText(df.format(dollars));
+    }
+
+    private void updateIconsForAvailableModes() {
+        TerminalConfigStatus status = ConfigStatusProvider.getInstance(this).getStatus();
+        boolean picc = status.isPiccAvailable();
+        boolean icc = status.isIccAvailable();
+        boolean mag = status.isMagAvailable();
+
+        iconSwipe.setVisibility(mag ? View.VISIBLE : View.GONE);
+        iconInsert.setVisibility(icc ? View.VISIBLE : View.GONE);
+        iconTap.setVisibility(picc ? View.VISIBLE : View.GONE);
+
+        if (!picc && !icc && !mag) {
+            iconSwipe.setVisibility(View.VISIBLE);
+            iconInsert.setVisibility(View.VISIBLE);
+            iconTap.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void onBackOrCancel() {
+        if (isFailed) {
+            finish();
+        } else {
+            onCancel();
+        }
+    }
+
     private void onDetectResult(CardReadResult result) {
         if (result.isSuccess()) {
-            Intent i = new Intent(this, ProcessingActivity.class);
-            i.putExtra(ProcessingActivity.EXTRA_AMOUNT_CENT, amountCent);
-            i.putExtra(ProcessingActivity.EXTRA_READ_TYPE, result.getReadType());
-            i.putExtra(ProcessingActivity.EXTRA_CARD_INFO, result.getCardInfo());
+            Intent i = new Intent(this, CardholderConfirmActivity.class);
+            i.putExtra(CardholderConfirmActivity.EXTRA_AMOUNT_CENT, amountCent);
+            i.putExtra(CardholderConfirmActivity.EXTRA_TIP_CENT, tipCent);
+            i.putExtra(CardholderConfirmActivity.EXTRA_READ_TYPE, result.getReadType());
+            i.putExtra(CardholderConfirmActivity.EXTRA_CARD_INFO, result.getCardInfo());
             startActivity(i);
             finish();
             return;
         }
-        // Failure: stay on page, show message, offer Retry / Back / 换方式 (no finish)
+        isFailed = true;
         if (result.getFailCode() == CardReadResult.RET_TIMEOUT) {
             promptText.setText(getString(R.string.read_card_timeout) + "\n" + getString(R.string.try_different_mode));
         } else if (result.getFailCode() == CardReadResult.RET_INIT_FAILED) {
@@ -70,21 +127,14 @@ public class ReadCardActivity extends AppCompatActivity {
             promptText.setText(maybeCardRemoved ? getString(R.string.card_removed_retry)
                     : (reason != null ? reason : getString(R.string.trans_failed)) + "\n" + getString(R.string.try_different_mode));
         }
-        cancelBtn.setText(R.string.back);
-        cancelBtn.setOnClickListener(v -> finish());
-        Button retryBtn = findViewById(R.id.btn_retry);
-        if (retryBtn != null) {
-            retryBtn.setVisibility(View.VISIBLE);
-            retryBtn.setOnClickListener(v -> startDetectAgain());
-        }
+        retryBtn.setVisibility(View.VISIBLE);
     }
 
     private void startDetectAgain() {
-        Button retryBtn = findViewById(R.id.btn_retry);
-        if (retryBtn != null) retryBtn.setVisibility(View.GONE);
-        updatePromptForAvailableModes();
-        cancelBtn.setText(R.string.cancel);
-        cancelBtn.setOnClickListener(v -> onCancel());
+        isFailed = false;
+        retryBtn.setVisibility(View.GONE);
+        promptText.setText(R.string.please_swipe_insert_tap);
+        updateIconsForAvailableModes();
         if (cardReader != null) cardReader.stopDetect();
         cardReader = new CardReaderManager(PaymentDemoApp.getApp());
         byte modeMask = buildModeMask();
@@ -98,23 +148,6 @@ public class ReadCardActivity extends AppCompatActivity {
         if (status.isIccAvailable()) mode |= EReaderType.ICC.getEReaderType();
         if (status.isMagAvailable()) mode |= EReaderType.MAG.getEReaderType();
         return mode;
-    }
-
-    private void updatePromptForAvailableModes() {
-        TerminalConfigStatus status = ConfigStatusProvider.getInstance(this).getStatus();
-        boolean picc = status.isPiccAvailable();
-        boolean icc = status.isIccAvailable();
-        boolean mag = status.isMagAvailable();
-        int resId;
-        if (picc && icc && mag) resId = R.string.read_mode_all;
-        else if (picc && icc) resId = R.string.read_mode_picc_icc;
-        else if (picc && mag) resId = R.string.read_mode_picc_mag;
-        else if (icc && mag) resId = R.string.read_mode_icc_mag;
-        else if (picc) resId = R.string.read_mode_picc;
-        else if (icc) resId = R.string.read_mode_icc;
-        else if (mag) resId = R.string.read_mode_mag;
-        else resId = R.string.read_mode_none;
-        promptText.setText(resId);
     }
 
     private void onCancel() {

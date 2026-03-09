@@ -1,92 +1,104 @@
-# Implementation Plan: 拍卡后 Clss_CoreInit_Entry UnsatisfiedLinkError 修复
+# Implementation Plan: [FEATURE]
 
-**Branch**: `001-payment-demo` | **Date**: 2026-03-06 | **Spec**: [spec.md](./spec.md)  
-**Input**: 拍卡后应用崩溃：`UnsatisfiedLinkError: No implementation found for int com.pax.jemv.entrypoint.api.ClssEntryApi.Clss_CoreInit_Entry()`
+**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
+**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
 
----
+**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
 
 ## Summary
 
-**问题**: 挥卡（PICC）后进入 ProcessingActivity，调用 ClssProcess.preTransProcess() 时崩溃，报 `Clss_CoreInit_Entry` 的 native 实现未找到。  
-**根因**: `PaymentDemoApp` 未调用 `EmvBase.loadLibrary()`，EMV/Clss 的 native 库（JNI_ENTRY_v103、F_ENTRY_LIB_PayDroid 等）从未被加载。参考项目 `EmvDemoApp` 在 `initEmvModule()` 中调用 `EmvBase.loadLibrary()`。  
-**修复**: 在 `PaymentDemoApp` 启动时调用 `EmvBase.loadLibrary()`，确保在首次使用 ClssProcess 前完成 native 库加载。
-
----
+[Extract from feature spec: primary requirement + technical approach from research]
 
 ## Technical Context
 
-**Language/Version**: Java 8  
-**Primary Dependencies**: NeptuneLiteAPI (sdk)、EMV 库 (emv)、commonlib  
-**Target Platform**: Android 8+ (API 26)，PAX 等 32 位终端  
-**Project Type**: mobile-app (Android)
+<!--
+  ACTION REQUIRED: Replace the content in this section with the technical details
+  for the project. The structure here is presented in advisory capacity to guide
+  the iteration process.
+-->
 
----
+**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
+**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
+**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
+**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
+**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
+**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]  
+**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
+**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
+**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
 
-## Phase 0: 根因分析
+## Constitution Check
 
-### 错误堆栈
+*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-```
-UnsatisfiedLinkError: No implementation found for int com.pax.jemv.entrypoint.api.ClssEntryApi.Clss_CoreInit_Entry()
-  at ClssEntryApi.Clss_CoreInit_Entry(Native Method)
-  at ClssProcess.preTransProcess(ClssProcess.java:74)
-  at EmvProcessor.doPreTrans(EmvProcessor.java:139)
-  at EmvProcessor.process(...)
-  at ProcessingActivity.onCreate(...)
-```
-
-### 代码审查结论
-
-| 检查项 | 结论 |
-|--------|------|
-| EmvDemoApp | 在 `initEmvModule()` 中调用 `EmvBase.loadLibrary()` |
-| PaymentDemoApp | **未调用** `EmvBase.loadLibrary()` |
-| EmvBase.loadLibrary() | 加载 F_DEVICE_LIB、F_PUBLIC_LIB、F_EMV_*、**F_ENTRY_LIB、JNI_ENTRY_v103**、F_MC_*、F_WAVE_*、F_AE_* 等 |
-| Clss_CoreInit_Entry | 由 JNI_ENTRY_v103 或 F_ENTRY_LIB 提供，需先 loadLibrary |
-
-### 根因
-
-`ClssEntryApi.Clss_CoreInit_Entry()` 为 JNI 方法，实现在 `JNI_ENTRY_v103` 或 `F_ENTRY_LIB_PayDroid` 中。这些库通过 `EmvBase.loadLibrary()` 加载。本应用未调用，导致首次执行 Clss 相关 native 方法时抛出 UnsatisfiedLinkError。
-
----
-
-## Phase 1: 修复方案
-
-### 修复点
-
-**文件**: `app/src/main/java/com/payment/demo/app/PaymentDemoApp.java`
-
-**修改**: 在 Application 启动时调用 `EmvBase.loadLibrary()`。参考 EmvDemoApp，在后台线程执行以避免阻塞主线程。
-
-```java
-// 在 onCreate 中增加
-initEmvLibs();
-
-// 新增方法
-private void initEmvLibs() {
-    backgroundExecutor.execute(() -> {
-        try {
-            com.paxsz.module.emv.process.EmvBase.loadLibrary();
-            Log.d(TAG, "EMV libs loaded");
-        } catch (Throwable t) {
-            Log.e(TAG, "EMV loadLibrary failed", t);
-        }
-    });
-}
-```
-
-### 验证步骤
-
-1. 构建：`gradlew assembleDebug`
-2. 安装到 PAX 真机
-3. 输入金额 → 开始交易 → 挥卡
-4. 应进入处理中页并完成 EMV 流程，不再崩溃
-
----
+[Gates determined based on constitution file]
 
 ## Project Structure
 
+### Documentation (this feature)
+
 ```text
-app/src/main/java/com/payment/demo/app/PaymentDemoApp.java  # 修复目标
-emv/src/main/java/com/paxsz/module/emv/process/EmvBase.java # loadLibrary 定义
+specs/[###-feature]/
+├── plan.md              # This file (/speckit.plan command output)
+├── research.md          # Phase 0 output (/speckit.plan command)
+├── data-model.md        # Phase 1 output (/speckit.plan command)
+├── quickstart.md        # Phase 1 output (/speckit.plan command)
+├── contracts/           # Phase 1 output (/speckit.plan command)
+└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
 ```
+
+### Source Code (repository root)
+<!--
+  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
+  for this feature. Delete unused options and expand the chosen structure with
+  real paths (e.g., apps/admin, packages/something). The delivered plan must
+  not include Option labels.
+-->
+
+```text
+# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
+src/
+├── models/
+├── services/
+├── cli/
+└── lib/
+
+tests/
+├── contract/
+├── integration/
+└── unit/
+
+# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
+backend/
+├── src/
+│   ├── models/
+│   ├── services/
+│   └── api/
+└── tests/
+
+frontend/
+├── src/
+│   ├── components/
+│   ├── pages/
+│   └── services/
+└── tests/
+
+# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
+api/
+└── [same as backend above]
+
+ios/ or android/
+└── [platform-specific structure: feature modules, UI flows, platform tests]
+```
+
+**Structure Decision**: [Document the selected structure and reference the real
+directories captured above]
+
+## Complexity Tracking
+
+> **Fill ONLY if Constitution Check has violations that must be justified**
+
+| Violation | Why Needed | Simpler Alternative Rejected Because |
+|-----------|------------|-------------------------------------|
+| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
+| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |

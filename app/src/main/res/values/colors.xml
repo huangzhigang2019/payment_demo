@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Lanhu design colors -->
+    <color name="lanhu_blue">#0FA0F1</color>
+    <color name="lanhu_orange">#FFBC56</color>
+    <color name="lanhu_amount_bg">#EEF5FF</color>
+    <color name="lanhu_amount_info_bg">#F5F5F5</color>
+    <color name="lanhu_keypad_bg">#E8EAE9</color>
+    <color name="lanhu_white">#FFFFFF</color>
+    <color name="lanhu_text_dark">#000000</color>
+    <color name="lanhu_text_gray">#787878</color>
+    <color name="lanhu_overlay">#99000000</color>
+</resources>

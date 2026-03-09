@@ -5,7 +5,7 @@
 
 **Tests**: 规格未强制要求 TDD；未生成独立测试任务。验证见 quickstart.md 与各 Phase Independent Test。
 
-**Organization**: 按用户故事分组，便于独立实现与验证。
+**Organization**: 按用户故事分组，便于独立实现与验证。Phase 7 为 SALE DEMO UI 优化（蓝湖资源集成）。
 
 ---
 
@@ -37,9 +37,9 @@
 
 ## Phase 2: Foundational（阻塞所有用户故事）
 
-**Purpose**: DAL 初始化、参数加载、状态查询、基础实体与错误处理就绪；Application 内需完成 EMV native 库加载（plan.md），确保 ClssProcess 使用前已 loadLibrary。
+**Purpose**: DAL 初始化、参数加载、状态查询、基础实体与错误处理就绪；Application 内需完成 EMV native 库加载。
 
-**⚠️ CRITICAL**: 未完成本阶段前，不得开始任何用户故事实现。
+**CRITICAL**: 未完成本阶段前，不得开始任何用户故事实现。
 
 - [x] T006 初始化 Application 与 DAL 获取（容错不崩溃，提供线程切换能力）；含 EMV 库加载 EmvBase.loadLibrary()（`app/src/main/java/com/payment/demo/app/PaymentDemoApp.java`）
 - [x] T007 配置/状态模块：参数加载与 Terminal/Config Status 提供（`app/src/main/java/com/payment/demo/config/ConfigStatusProvider.java`）
@@ -51,7 +51,7 @@
 
 ---
 
-## Phase 3: User Story 1 - 完成一笔“消费/支付”交易（Priority: P1）🎯 MVP
+## Phase 3: User Story 1 - 完成一笔「消费/支付」交易（Priority: P1） MVP
 
 **Goal**: 输入金额 → 寻卡 → EMV 处理 → 结果页；支持取消与读卡超时。
 
@@ -60,8 +60,8 @@
 ### Implementation（US1）
 
 - [x] T011 [US1] 金额输入校验与开始交易入口（阻止非法金额）（`app/src/main/java/com/payment/demo/ui/MainActivity.java`）
-- [x] T012 [US1] DAL 就绪校验：跳转读卡页前确认 `getDal()!=null` 或提供“设备未就绪”提示（`app/src/main/java/com/payment/demo/ui/MainActivity.java`, `app/src/main/res/values/strings.xml`）
-- [x] T013 [US1] 读卡模块：使用显式 mode (PICC|ICC|MAG) 替代 EReaderType.DEFAULT，支持 PICC/ICC/MAG 轮询（MAG: isSwiped/read；ICC: detect/init；PICC: detect），并保留 stop/close 兜底（`app/src/main/java/com/payment/demo/card/CardReaderManager.java`）
+- [x] T012 [US1] DAL 就绪校验：跳转读卡页前确认 `getDal()!=null` 或提供「设备未就绪」提示（`app/src/main/java/com/payment/demo/ui/MainActivity.java`, `app/src/main/res/values/strings.xml`）
+- [x] T013 [US1] 读卡模块：使用显式 mode (PICC|ICC|MAG) 替代 EReaderType.DEFAULT，支持 PICC/ICC/MAG 轮询（`app/src/main/java/com/payment/demo/card/CardReaderManager.java`）
 - [x] T014 [US1] 读卡引导页：成功跳转处理中；超时/取消/初始化失败可读提示 + 重试/返回（`app/src/main/java/com/payment/demo/ui/ReadCardActivity.java`, `app/src/main/res/layout/activity_read_card.xml`, `app/src/main/res/values/strings.xml`）
 - [x] T015 [US1] EMV 处理封装：按介质类型调用 EmvProcess/ClssProcess，处理应用选择/PIN/在线授权回调并输出 ProcessingResult（`app/src/main/java/com/payment/demo/emv/*`）
 - [x] T016 [US1] 处理中页：调用 EMV 处理模块，异常/不可恢复错误转失败并展示原因，不崩溃（`app/src/main/java/com/payment/demo/ui/ProcessingActivity.java`）
@@ -74,7 +74,7 @@
 
 ## Phase 4: User Story 2 - 支持多种读卡方式与回退提示（Priority: P2）
 
-**Goal**: 多介质读卡与“换方式/重试/取消”回退提示覆盖更多演示场景。
+**Goal**: 多介质读卡与「换方式/重试/取消」回退提示覆盖更多演示场景。
 
 **Independent Test**: 用不同介质卡验证；某方式失败/不支持时提示可操作，能回到可继续状态。
 
@@ -88,7 +88,7 @@
 
 **Goal**: 设置/信息页可查看版本与关键状态，便于排障。
 
-**Independent Test**: 不插卡即可进入设置页看到“参数是否加载/读卡是否可用/版本信息”。
+**Independent Test**: 不插卡即可进入设置页看到「参数是否加载/读卡是否可用/版本信息」。
 
 - [x] T022 [US3] 设置/信息页展示：版本、参数加载状态、读卡模块可用性（`app/src/main/java/com/payment/demo/ui/SettingsActivity.java`, `app/src/main/java/com/payment/demo/config/ConfigStatusProvider.java`, `app/src/main/res/layout/activity_settings.xml`）
 - [x] T023 [US3] 主入口增加设置入口并可返回（`app/src/main/java/com/payment/demo/ui/MainActivity.java`, `app/src/main/res/layout/activity_main.xml`）
@@ -107,38 +107,55 @@
 
 ---
 
+## Phase 7: SALE DEMO UI 优化（蓝湖资源集成）
+
+**Purpose**: 使用蓝湖 SALE DEMO 设计资源优化支付流程 UI，满足 FR-008 视觉一致性。
+
+**Independent Test**: 主流程各屏使用 SALE DEMO 切图；读卡页按模式切换图标；结果页使用 SALE DEMO 成功/失败图。
+
+- [x] T029 [P] 创建 fetch_sale_demo.py 脚本，通过蓝湖 API 获取 SALE DEMO 及交易相关设计图并保存到 app drawable（`lanhu-mcp/fetch_sale_demo.py`, `app/src/main/res/drawable/sale_demo_*.png`）
+- [x] T030 [P] 创建 design-specs/sale-demo.md 记录切图与界面映射关系（`specs/001-payment-demo/design-specs/sale-demo.md`）
+- [x] T031 [US1] 读卡引导页使用 SALE DEMO 切图，按读卡模式（PICC/ICC/MAG）切换图标（`app/src/main/res/layout/activity_read_card.xml`, `app/src/main/java/com/payment/demo/ui/ReadCardActivity.java`）
+- [x] T032 [US1] 处理中页使用 sale_demo_processing，PIN 状态时切换 sale_demo_please_enter_pin（`app/src/main/res/layout/activity_processing.xml`, `app/src/main/java/com/payment/demo/ui/ProcessingActivity.java`）
+- [x] T033 [US1] 结果页使用 sale_demo_successful_transaction / sale_demo_deal_failed（`app/src/main/res/layout/activity_result.xml`, `app/src/main/java/com/payment/demo/ui/ResultActivity.java`）
+- [x] T034 对照 contracts/screens.md 验证各屏输入/输出与导航，确认 FR-008 与 SC-004 满足（`specs/001-payment-demo/contracts/screens.md`）
+
+**Checkpoint**: SALE DEMO UI 已集成，契约验收通过。
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
 
-- Phase 1 → Phase 2 → Phase 3/4/5 → Phase 6
+- Phase 1 → Phase 2 → Phase 3/4/5 → Phase 6 → Phase 7
 
 ### User Story Dependencies
 
 - **US1（P1）**: 依赖 Phase 2（Foundational）；无其他故事依赖
 - **US2（P2）**: 依赖 Phase 2；建议在 US1 读卡稳定后增强，可独立验收
 - **US3（P3）**: 依赖 Phase 2（尤其 ConfigStatusProvider）；可独立验收
+- **Phase 7（SALE DEMO）**: 依赖 Phase 3 完成；增强 US1 相关界面
 
 ### Within Each User Story
 
-- 实体/契约已落在 Phase 2 或 Setup；各故事内任务按实现顺序（入口 → 读卡/处理 → 结果/设置）
+- 实体/契约已落在 Phase 2 或 Setup；各故事内任务按实现顺序
 - 每 Phase 完成可在 Checkpoint 做独立验证
 
 ### Parallel Opportunities
 
 - Phase 1：T003 与 T004 可并行
-- Phase 2：T008 可与其他任务并行（独立实体文件）
-- Phase 3：T011 与 T013、T015 可并行（不同文件）
-- Phase 6：T026 与其它收尾任务可并行
+- Phase 2：T008 可与其他任务并行
+- Phase 3：T011 与 T013、T015 可并行
+- Phase 7：T029 与 T030 可并行
 
 ---
 
-## Parallel Example: US1
+## Parallel Example: Phase 7
 
 ```text
-Task: "T011 MainActivity 金额校验（app/src/main/java/com/payment/demo/ui/MainActivity.java）"
-Task: "T013 CardReaderManager 显式 mode + PICC/ICC/MAG（app/src/main/java/com/payment/demo/card/CardReaderManager.java）"
-Task: "T015 EMV 处理封装（app/src/main/java/com/payment/demo/emv/*）"
+Task: "T029 创建 fetch_sale_demo.py 并获取 SALE DEMO 资源（lanhu-mcp/fetch_sale_demo.py）"
+Task: "T030 创建 design-specs/sale-demo.md（specs/001-payment-demo/design-specs/sale-demo.md）"
 ```
 
 ---
@@ -159,12 +176,8 @@ Task: "T015 EMV 处理封装（app/src/main/java/com/payment/demo/emv/*）"
 2. 加入 US1 → 独立验证 → 部署（MVP）
 3. 加入 US2 → 独立验证 → 部署
 4. 加入 US3 → 独立验证 → 部署
-5. 每故事增量交付，不破坏已有功能
-
-### 与 plan.md 的对应
-
-- **T006**：Application 初始化须包含 `EmvBase.loadLibrary()`（后台线程），避免拍卡后 `Clss_CoreInit_Entry` UnsatisfiedLinkError。
-- **T013**：读卡须使用显式 mode `(PICC|ICC|MAG)` 替代 `EReaderType.DEFAULT`，否则轮询不进入检测分支，寻卡无反应。
+5. 加入 Phase 7 SALE DEMO UI → 独立验证 → 部署
+6. 每阶段增量交付，不破坏已有功能
 
 ---
 
@@ -174,3 +187,4 @@ Task: "T015 EMV 处理封装（app/src/main/java/com/payment/demo/emv/*）"
 - [USn] 标签用于与 spec 用户故事对应
 - 每 Phase 可在 Checkpoint 单独验收
 - 路径以 repo 根为基准；Android 模块为 `app/`、`emv/`、`sdk/`、`commonlib/`
+- Phase 7 前置：需配置 `lanhu-mcp/.env` 中 LANHU_COOKIE，运行 `lanhu-mcp/.venv/Scripts/python.exe fetch_sale_demo.py` 获取资源

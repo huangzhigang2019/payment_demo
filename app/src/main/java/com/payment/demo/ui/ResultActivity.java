@@ -1,20 +1,25 @@
 package com.payment.demo.ui;
 
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.Button;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
+import android.view.View;
+
+import android.support.v4.content.ContextCompat;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.payment.demo.R;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-
 /**
- * T009/T015: 结果页 — 展示金额、时间、状态、原因摘要，返回/再试一笔.
+ * T009/T015: 结果页 — 展示成功/失败图标与标题，失败时3秒倒计时自动返回.
  */
 public class ResultActivity extends AppCompatActivity {
     public static final String EXTRA_TRANSACTION_AMOUNT_CENT = "amount_cent";
@@ -23,55 +28,76 @@ public class ResultActivity extends AppCompatActivity {
     public static final String EXTRA_RESULT_STATUS = "result_status";
     public static final String EXTRA_RESULT_REASON = "result_reason";
 
+    private static final int COUNTDOWN_SECONDS = 3;
+
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private Runnable countdownRunnable;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_result);
 
-        long amountCent = getIntent().getLongExtra(EXTRA_TRANSACTION_AMOUNT_CENT, 0);
-        long startMs = getIntent().getLongExtra(EXTRA_TRANSACTION_START, 0);
-        long endMs = getIntent().getLongExtra(EXTRA_TRANSACTION_END, 0);
         String status = getIntent().getStringExtra(EXTRA_RESULT_STATUS);
-        String reason = getIntent().getStringExtra(EXTRA_RESULT_REASON);
+        boolean isSuccess = "SUCCESS".equals(status);
 
         ImageView iconView = findViewById(R.id.result_icon);
-        TextView amountTv = findViewById(R.id.result_amount);
-        TextView timeTv = findViewById(R.id.result_time);
-        TextView statusTv = findViewById(R.id.result_status);
-        TextView reasonTv = findViewById(R.id.result_reason);
+        TextView titleView = findViewById(R.id.result_title);
+        TextView countdownView = findViewById(R.id.result_countdown);
+        TextView returnBtn = findViewById(R.id.btn_return);
 
-        boolean isSuccess = "SUCCESS".equals(status);
-        iconView.setImageResource(isSuccess ? R.drawable.success : R.drawable.failed);
+        iconView.setImageResource(isSuccess ? R.drawable.sale_demo_successful_transaction : R.drawable.sale_demo_deal_failed);
+        titleView.setText(isSuccess ? R.string.transaction_approved : R.string.transaction_failed);
 
-        amountTv.setText(getString(R.string.app_name) + " 金额: " + (amountCent / 100.0) + " 元");
-        timeTv.setText("时间: " + formatTime(endMs));
-        String statusDisplay = status != null ? mapStatusToDisplay(status) : "—";
-        statusTv.setText(statusDisplay);
-        reasonTv.setText(reason != null ? reason : "");
+        returnBtn.setOnClickListener(v -> onReturn());
 
-        Button backBtn = findViewById(R.id.btn_back);
-        backBtn.setOnClickListener(v -> {
-            startActivity(new Intent(this, MainActivity.class));
-            finish();
-        });
-        Button againBtn = findViewById(R.id.btn_try_again);
-        againBtn.setOnClickListener(v -> {
-            startActivity(new Intent(this, MainActivity.class));
-            finish();
-        });
-    }
-
-    private String formatTime(long ms) {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date(ms));
-    }
-
-    private String mapStatusToDisplay(String status) {
-        if (status == null) return "—";
-        switch (status) {
-            case "SUCCESS": return getString(R.string.trans_success);
-            case "CANCELLED": return getString(R.string.trans_cancelled);
-            case "TIMEOUT": return getString(R.string.trans_timeout);
-            default: return getString(R.string.trans_failed);
+        if (isSuccess) {
+            countdownView.setVisibility(View.GONE);
+        } else {
+            countdownView.setVisibility(View.VISIBLE);
+            startCountdown(countdownView);
         }
+    }
+
+    private void startCountdown(TextView countdownView) {
+        final int[] remaining = {COUNTDOWN_SECONDS};
+        countdownRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (remaining[0] <= 0) {
+                    onReturn();
+                    return;
+                }
+                String template = getString(R.string.return_in_seconds);
+                String full = String.format(template, remaining[0]);
+                SpannableString ss = new SpannableString(full);
+                int numStart = full.indexOf(String.valueOf(remaining[0]));
+                int numEnd = numStart + String.valueOf(remaining[0]).length();
+                if (numStart >= 0 && numEnd <= full.length()) {
+                    ss.setSpan(new ForegroundColorSpan(ContextCompat.getColor(ResultActivity.this, R.color.lanhu_blue)), numStart, numEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    ss.setSpan(new StyleSpan(Typeface.BOLD), numStart, numEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+                countdownView.setText(ss);
+                remaining[0]--;
+                handler.postDelayed(this, 1000);
+            }
+        };
+        handler.post(countdownRunnable);
+    }
+
+    private void onReturn() {
+        if (countdownRunnable != null) {
+            handler.removeCallbacks(countdownRunnable);
+        }
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (countdownRunnable != null) {
+            handler.removeCallbacks(countdownRunnable);
+        }
+        super.onDestroy();
     }
 }

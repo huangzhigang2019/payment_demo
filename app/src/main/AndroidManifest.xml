@@ -30,11 +30,27 @@
         </activity>
 
         <activity
+            android:name=".ui.TipActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.ReadCardActivity"
             android:exported="false" />
 
         <activity
+            android:name=".ui.CardholderConfirmActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.ProcessingActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.SignatureActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.PrintPreviewActivity"
             android:exported="false" />
 
         <activity

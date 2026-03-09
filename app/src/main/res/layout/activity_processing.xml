@@ -1,22 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:padding="24dp">
+    android:background="@drawable/bg_overlay">
 
-    <ImageView
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:src="@drawable/processing"
-        android:contentDescription="@string/processing" />
-
-    <TextView
-        android:id="@+id/processing_status"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/processing"
-        android:textSize="20sp" />
-</LinearLayout>
+        android:layout_gravity="center"
+        android:background="@drawable/bg_processing_card"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="48dp">
+
+        <FrameLayout
+            android:layout_width="80dp"
+            android:layout_height="80dp">
+
+            <ProgressBar
+                android:id="@+id/processing_spinner"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_gravity="center"
+                android:indeterminate="true" />
+
+            <ImageView
+                android:id="@+id/processing_icon"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_gravity="center"
+                android:contentDescription="@string/processing"
+                android:src="@drawable/sale_demo_processing"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/processing_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/processing"
+            android:textColor="@color/lanhu_text_dark"
+            android:textSize="24sp"
+            android:fontFamily="sans-serif-medium" />
+    </LinearLayout>
+</FrameLayout>

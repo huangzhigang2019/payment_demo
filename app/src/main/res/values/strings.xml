@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">支付Demo</string>
+    <string name="sale_demo_title">SALE DEMO</string>
     <string name="start_transaction">开始交易</string>
     <string name="amount_hint">请输入金额</string>
     <string name="settings">设置</string>
@@ -30,4 +31,32 @@
     <string name="read_mode_icc_mag">请插卡或刷磁条</string>
     <string name="read_mode_all">请挥卡 / 插卡 / 刷磁条</string>
     <string name="read_mode_none">无可用读卡方式，请检查设备</string>
+    <string name="detect_card_title">Detect Card</string>
+    <string name="trans_amount_label">Trans Amount:</string>
+    <string name="please_swipe_insert_tap">Please Swipe/Insert/Tap Card</string>
+    <string name="swipe_card">Swipe Card</string>
+    <string name="insert_card">Insert Card</string>
+    <string name="tap_card">Tap Card</string>
+    <string name="using_scan_code">Using Scan Code</string>
+    <string name="return_label">Return</string>
+    <string name="transaction_approved">Transaction Approved</string>
+    <string name="transaction_failed">Transaction Failed</string>
+    <string name="return_in_seconds">Return in %d seconds</string>
+    <string name="adjust_tip_title">Adjust Tip</string>
+    <string name="original_amount_label">Original Amount</string>
+    <string name="tip_amount_label">Tip Amount</string>
+    <string name="total_amount_label">Total Amount</string>
+    <string name="tip_exceeds_limit">Tip cannot exceed 10%% of original amount</string>
+    <string name="cardholder_confirm_title">Cardholder Confirm</string>
+    <string name="please_confirm_card">Please confirm card number</string>
+    <string name="confirm">CONFIRM</string>
+    <string name="signature_title">Signature</string>
+    <string name="clear">Clear</string>
+    <string name="save">SAVE</string>
+    <string name="please_sign_first">Please sign first</string>
+    <string name="print_preview_title">Print Preview</string>
+    <string name="print_receipt">Print Receipt</string>
+    <string name="printer_paper_out">Printer paper out, please add paper</string>
+    <string name="print_complete">Print complete</string>
+    <string name="printer_not_available">Printer not available</string>
 </resources>

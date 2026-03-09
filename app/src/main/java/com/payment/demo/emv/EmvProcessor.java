@@ -186,7 +186,7 @@ public class EmvProcessor {
 
         @Override
         public int onCardHolderPwd(boolean bOnlinePin, boolean supportPINByPass, int leftTimes, byte[] pinData) {
-            return RetCode.EMV_USER_CANCEL; // MVP: 取消 PIN
+            return RetCode.EMV_OK; // 允许 EMV 继续，由 DeviceImplPayment.pedVerifyPlainPin/pedVerifyCipherPin 调用 PED 真实输入
         }
     };
 
