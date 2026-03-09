@@ -5,7 +5,7 @@
     android:orientation="vertical"
     android:background="@color/lanhu_white">
 
-    <!-- Title bar: Adjust Tip + back -->
+    <!-- Title bar: back + Adjust Tip -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
@@ -28,119 +28,105 @@
             android:layout_centerInParent="true"
             android:text="@string/adjust_tip_title"
             android:textColor="@color/lanhu_text_dark"
-            android:textSize="32sp"
+            android:textSize="22sp"
             android:fontFamily="sans-serif-medium" />
     </RelativeLayout>
 
-    <!-- Original amount display -->
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="14dp"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/bg_amount_display"
-        android:padding="24dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/original_amount_label"
-                android:textColor="@color/lanhu_text_gray"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/original_amount_display"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="end"
-                android:text="$ 0.00"
-                android:textColor="@color/lanhu_text_dark"
-                android:textSize="36sp"
-                android:fontFamily="sans-serif-medium" />
-        </LinearLayout>
-    </FrameLayout>
-
-    <!-- Tip amount display -->
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="14dp"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/bg_amount_display"
-        android:padding="24dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/tip_amount_label"
-                android:textColor="@color/lanhu_text_gray"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/tip_amount_display"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="end"
-                android:text="$ 0.00"
-                android:textColor="@color/lanhu_text_dark"
-                android:textSize="36sp"
-                android:fontFamily="sans-serif-medium" />
-        </LinearLayout>
-    </FrameLayout>
-
-    <!-- Total amount display -->
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="14dp"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/bg_amount_display"
-        android:padding="24dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/total_amount_label"
-                android:textColor="@color/lanhu_text_gray"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/total_amount_display"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="end"
-                android:text="$ 0.00"
-                android:textColor="@color/lanhu_blue"
-                android:textSize="40sp"
-                android:fontFamily="sans-serif-medium" />
-        </LinearLayout>
-    </FrameLayout>
-
-    <!-- Keypad area -->
+    <!-- Amount row: label left, value right, no card background -->
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/original_amount_label"
+            android:textColor="@color/lanhu_text_gray"
+            android:textSize="16sp" />
+
+        <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/original_amount_display"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="$ 0.00"
+            android:textColor="@color/lanhu_text_dark"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-medium" />
+    </LinearLayout>
+
+    <!-- Tip label -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="20dp"
+        android:text="@string/tip_amount_label"
+        android:textColor="@color/lanhu_text_gray"
+        android:textSize="16sp" />
+
+    <!-- Tip input card: blue rounded rectangle showing tip amount -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/bg_tip_input"
+        android:padding="20dp">
+
+        <TextView
+            android:id="@+id/tip_amount_display"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:text="$ 0.00"
+            android:textColor="@color/lanhu_text_dark"
+            android:textSize="36sp"
+            android:fontFamily="sans-serif-medium" />
+    </FrameLayout>
+
+    <!-- Total Amount row: label left, value right, no card background -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/total_amount_label"
+            android:textColor="@color/lanhu_text_gray"
+            android:textSize="16sp" />
+
+        <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/total_amount_display"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="$ 0.00"
+            android:textColor="@color/lanhu_text_dark"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-medium" />
+    </LinearLayout>
+
+    <!-- Keypad area: white background, same as design -->
+    <LinearLayout
+        android:id="@+id/keypad_area"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@color/lanhu_keypad_bg"
+        android:background="@color/lanhu_white"
         android:padding="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
         android:orientation="vertical">
 
+        <!-- Row 1: 1 2 3 CLEAR -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -177,16 +163,18 @@
                 android:background="@drawable/bg_btn_clear"
                 android:text="CLEAR"
                 android:textColor="@color/lanhu_white"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:fontFamily="sans-serif-medium" />
         </LinearLayout>
 
+        <!-- Rows 2-4: 4-9, 000/00/0 with DONE spanning right column -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="3"
             android:orientation="horizontal">
 
+            <!-- Left 3 columns: rows 2, 3, 4 -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -281,6 +269,7 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <!-- DONE button spanning rows 2-4 -->
             <Button
                 android:id="@+id/btn_done"
                 android:layout_width="0dp"

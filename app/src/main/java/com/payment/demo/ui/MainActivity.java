@@ -3,8 +3,6 @@ package com.payment.demo.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,7 +15,7 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 /**
- * T009/T011/T012: 主入口 — 金额键盘输入、DAL 就绪校验、开始交易、进入设置.
+ * 主入口 — 金额键盘输入、DAL 就绪校验、开始交易、进入设置.
  */
 public class MainActivity extends AppCompatActivity {
 
@@ -34,7 +32,6 @@ public class MainActivity extends AppCompatActivity {
         amountDisplay = findViewById(R.id.amount_display);
         amountCent = 0;
         updateAmountDisplay();
-
 
         int[] digitIds = {R.id.btn_0, R.id.btn_1, R.id.btn_2, R.id.btn_3, R.id.btn_4,
                 R.id.btn_5, R.id.btn_6, R.id.btn_7, R.id.btn_8, R.id.btn_9};
@@ -55,6 +52,13 @@ public class MainActivity extends AppCompatActivity {
 
         ImageButton settingsBtn = findViewById(R.id.btn_settings);
         settingsBtn.setOnClickListener(v -> startActivity(new Intent(this, SettingsActivity.class)));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        amountCent = 0;
+        updateAmountDisplay();
     }
 
     private void appendDigit(int digit) {
