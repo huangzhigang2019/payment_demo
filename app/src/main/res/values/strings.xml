@@ -7,6 +7,9 @@
     <string name="settings">设置</string>
     <string name="insert_tap_card">请插卡 / 挥卡 / 刷磁条</string>
     <string name="processing">处理中…</string>
+    <string name="online_processing">联机处理中…</string>
+    <string name="card_reading">正在读卡…</string>
+    <string name="please_enter_pin">请输入PIN</string>
     <string name="cancel">CANCEL</string>
     <string name="retry">重试</string>
     <string name="back">返回</string>

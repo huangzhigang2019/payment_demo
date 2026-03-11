@@ -80,6 +80,11 @@ public class DeviceImplPayment implements IDevice {
     private IIcc icc;
     private boolean cancelKeyFlag = false;
     private TickTimer tickTimer = new TickTimer();
+    private volatile EmvProcessor.PromptCallback promptCallback;
+
+    public void setPromptCallback(EmvProcessor.PromptCallback cb) {
+        this.promptCallback = cb;
+    }
 
     private DeviceImplPayment() {
         dal = PaymentDemoApp.getApp().getDal();
@@ -396,6 +401,13 @@ public class DeviceImplPayment implements IDevice {
     @Override
     public int pedVerifyPlainPin(byte[] iccRespOut, byte mode) {
         LogUtils.i(TAG, "pedVerifyPlainPin:" + mode);
+        if (promptCallback != null) {
+            try {
+                promptCallback.onPrompt("Please enter PIN");
+            } catch (Exception e) {
+                LogUtils.w(TAG, e);
+            }
+        }
         try {
             ped.setKeyboardLayoutLandscape(false);
             byte[] result = ped.verifyPlainPin(iccSlot, expectPinLen, mode, timeOut);
@@ -421,6 +433,13 @@ public class DeviceImplPayment implements IDevice {
     @Override
     public int pedVerifyCipherPin(RsaPinKeyL2 rsaPinKeyIn, byte[] iccRespOut, byte mode) {
         LogUtils.i(TAG, "pedVerifyCipherPin:" + mode);
+        if (promptCallback != null) {
+            try {
+                promptCallback.onPrompt("Please enter PIN");
+            } catch (Exception e) {
+                LogUtils.w(TAG, e);
+            }
+        }
         RSAPinKey pinKey = new RSAPinKey();
         System.arraycopy(rsaPinKeyIn.exp, 0, pinKey.getExponent(), 0, 4);
         System.arraycopy(rsaPinKeyIn.iccrandom, 0, pinKey.getIccRandom(), 0, rsaPinKeyIn.iccrandomlen);

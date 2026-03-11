@@ -72,7 +72,7 @@ public class ReadCardActivity extends AppCompatActivity {
     }
 
     private void updateAmountDisplay() {
-        double dollars = amountCent / 100.0;
+        double dollars = (amountCent + tipCent) / 100.0;
         DecimalFormat df = (DecimalFormat) NumberFormat.getNumberInstance(Locale.US);
         df.applyPattern("$ #,##0.00");
         amountText.setText(df.format(dollars));
@@ -107,6 +107,20 @@ public class ReadCardActivity extends AppCompatActivity {
         if (result.isSuccess()) {
             if (result.getReadType() == com.pax.dal.entity.EReaderType.PICC.getEReaderType()) {
                 piccSuccessDetected = true;
+            }
+            // MAG: 先确认卡号再联机（读卡时已有 track2）
+            if (result.getReadType() == EReaderType.MAG.getEReaderType() && result.getCardInfo() != null) {
+                String masked = CardholderConfirmActivity.maskCardInfo(result.getCardInfo());
+                Intent i = new Intent(this, CardholderConfirmActivity.class);
+                i.putExtra(CardholderConfirmActivity.EXTRA_AMOUNT_CENT, amountCent);
+                i.putExtra(CardholderConfirmActivity.EXTRA_TIP_CENT, tipCent);
+                i.putExtra(CardholderConfirmActivity.EXTRA_READ_TYPE, result.getReadType());
+                i.putExtra(CardholderConfirmActivity.EXTRA_CARD_INFO, result.getCardInfo());
+                i.putExtra(CardholderConfirmActivity.EXTRA_MASKED_CARD_NO, masked);
+                i.putExtra(CardholderConfirmActivity.EXTRA_FROM_READ_CARD, true);
+                startActivity(i);
+                finish();
+                return;
             }
             Intent i = new Intent(this, ProcessingActivity.class);
             i.putExtra(ProcessingActivity.EXTRA_AMOUNT_CENT, amountCent);

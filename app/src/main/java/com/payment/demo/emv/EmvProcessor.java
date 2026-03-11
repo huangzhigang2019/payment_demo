@@ -22,7 +22,6 @@ import com.payment.demo.trans.TransResultStatus;
 import com.payment.demo.ui.CardholderConfirmActivity;
 
 import com.pax.jemv.clcommon.ByteArray;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -97,42 +96,52 @@ public class EmvProcessor {
             return pr;
         }
 
-        final PromptCallback cb = promptCallback;
-        TransResult tr;
-        if (isIcc(readType)) {
-            EmvProcess.getInstance().registerEmvProcessListener(emvListener);
-            tr = EmvProcess.getInstance().startTransProcess();
-        } else {
-            ClssProcess.getInstance().registerClssStatusListener(new IClssStatusListener() {
-                @Override
-                public void onRemoveCard() {
-                    if (cb != null) cb.onPrompt(context.getString(com.payment.demo.R.string.remove_card_prompt));
-                    while (true) {
-                        try {
-                            PaymentDemoApp.getApp().getDal().getPicc(com.pax.dal.entity.EPiccType.INTERNAL)
-                                    .remove(com.pax.dal.entity.EPiccRemoveMode.REMOVE, (byte) 0);
-                            break;
-                        } catch (Throwable e) {
-                            try { Thread.sleep(200); } catch (InterruptedException ie) { break; }
+        DeviceImplPayment.getInstance().setPromptCallback(promptCallback);
+        try {
+            final PromptCallback cb = promptCallback;
+            TransResult tr;
+            if (isIcc(readType)) {
+                EmvProcess.getInstance().registerEmvProcessListener(emvListener);
+                tr = EmvProcess.getInstance().startTransProcess();
+            } else {
+                ClssProcess.getInstance().registerClssStatusListener(new IClssStatusListener() {
+                    @Override
+                    public void onRemoveCard() {
+                        if (cb != null) cb.onPrompt(context.getString(com.payment.demo.R.string.remove_card_prompt));
+                        while (true) {
+                            try {
+                                PaymentDemoApp.getApp().getDal().getPicc(com.pax.dal.entity.EPiccType.INTERNAL)
+                                        .remove(com.pax.dal.entity.EPiccRemoveMode.REMOVE, (byte) 0);
+                                break;
+                            } catch (Throwable e) {
+                                try { Thread.sleep(200); } catch (InterruptedException ie) { break; }
+                            }
                         }
                     }
-                }
-                @Override
-                public boolean needSeePhone() { return false; }
-            });
-            ClssProcess.getInstance().registerStatusListener(statusListener);
-            tr = ClssProcess.getInstance().startTransProcess();
-            // Close PICC reader after CLSS transaction (was kept open from CardReaderManager detection)
-            try {
-                PaymentDemoApp.getApp().getDal().getPicc(com.pax.dal.entity.EPiccType.INTERNAL).close();
-            } catch (Throwable ignored) { }
-        }
+                    @Override
+                    public boolean needSeePhone() { return false; }
+                });
+                ClssProcess.getInstance().registerStatusListener(statusListener);
+                tr = ClssProcess.getInstance().startTransProcess();
+                // Close PICC reader after CLSS transaction (was kept open from CardReaderManager detection)
+                // onRemoveCard 已在 startTransProcess 内将卡从射频场移走，这里关闭读卡器即可
+                try {
+                    PaymentDemoApp.getApp().getDal().getPicc(com.pax.dal.entity.EPiccType.INTERNAL).close();
+                } catch (Throwable ignored) { }
+            }
 
-        mapTransResult(tr, pr);
-        if (pr.getResultStatus() == TransResultStatus.SUCCESS) {
-            populatePan(pr, readType, cardInfo);
+            mapTransResult(tr, pr, readType);
+            if (pr.getResultStatus() == TransResultStatus.SUCCESS
+                    || pr.getResultStatus() == TransResultStatus.NEED_CARDHOLDER_CONFIRM) {
+                try {
+                    populatePan(pr, readType, cardInfo);
+                } catch (Throwable _ex) {
+                }
+            }
+            return pr;
+        } finally {
+            DeviceImplPayment.getInstance().setPromptCallback(null);
         }
-        return pr;
     }
 
     private boolean isIcc(int readType) {
@@ -234,7 +243,7 @@ public class EmvProcessor {
         }
     }
 
-    private void mapTransResult(TransResult tr, ProcessingResult pr) {
+    private void mapTransResult(TransResult tr, ProcessingResult pr, int readType) {
         if (tr == null) {
             pr.setResultStatus(TransResultStatus.FAILED);
             pr.setDisplaySummary("EMV 返回空");
@@ -253,12 +262,13 @@ public class EmvProcessor {
             return;
         }
         TransResultEnum e = tr.getTransResult();
-        if (e == TransResultEnum.RESULT_OFFLINE_APPROVED
-                || e == TransResultEnum.RESULT_ONLINE_APPROVED
-                || e == TransResultEnum.RESULT_REQ_ONLINE) {
-            // RESULT_REQ_ONLINE: card requires online auth; demo always approves
+        if (e == TransResultEnum.RESULT_OFFLINE_APPROVED || e == TransResultEnum.RESULT_ONLINE_APPROVED) {
             pr.setResultStatus(TransResultStatus.SUCCESS);
             pr.setDisplaySummary("交易成功");
+        } else if (e == TransResultEnum.RESULT_REQ_ONLINE) {
+            // ICC/PICC 需联机：先确认卡号再联机，返回 NEED_CARDHOLDER_CONFIRM
+            pr.setResultStatus(TransResultStatus.NEED_CARDHOLDER_CONFIRM);
+            pr.setDisplaySummary("请确认卡号后联机");
         } else {
             pr.setResultStatus(TransResultStatus.FAILED);
             pr.setDisplaySummary(e != null ? e.name() : "失败(" + tr.getResultCode() + ")");

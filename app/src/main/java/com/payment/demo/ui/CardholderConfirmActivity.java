@@ -23,6 +23,10 @@ public class CardholderConfirmActivity extends AppCompatActivity {
     public static final String EXTRA_READ_TYPE = "read_type";
     public static final String EXTRA_CARD_INFO = "card_info";
     public static final String EXTRA_MASKED_CARD_NO = "masked_card_no";
+    /** 来自读卡页（MAG 先确认再联机），确认后进入 ProcessingActivity */
+    public static final String EXTRA_FROM_READ_CARD = "from_read_card";
+    /** PICC 需联机：先确认卡号，确认后执行 completeTransProcess 联机 */
+    public static final String EXTRA_BEFORE_ONLINE = "before_online";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +38,8 @@ public class CardholderConfirmActivity extends AppCompatActivity {
         int readType = getIntent().getIntExtra(EXTRA_READ_TYPE, 0);
         String cardInfo = getIntent().getStringExtra(EXTRA_CARD_INFO);
         String maskedCardNo = getIntent().getStringExtra(EXTRA_MASKED_CARD_NO);
+        boolean fromReadCard = getIntent().getBooleanExtra(EXTRA_FROM_READ_CARD, false);
+        boolean beforeOnline = getIntent().getBooleanExtra(EXTRA_BEFORE_ONLINE, false);
 
         TextView amountText = findViewById(R.id.amount_text);
         TextView cardNumberDisplay = findViewById(R.id.card_number_display);
@@ -49,13 +55,27 @@ public class CardholderConfirmActivity extends AppCompatActivity {
         findViewById(R.id.btn_back).setOnClickListener(v -> onCancel());
         findViewById(R.id.btn_cancel).setOnClickListener(v -> onCancel());
         findViewById(R.id.btn_confirm).setOnClickListener(v -> {
-            Intent i = new Intent(this, SignatureActivity.class);
-            i.putExtra(SignatureActivity.EXTRA_AMOUNT_CENT, amountCent);
-            i.putExtra(SignatureActivity.EXTRA_TIP_CENT, tipCent);
-            i.putExtra(SignatureActivity.EXTRA_READ_TYPE, readType);
-            i.putExtra(SignatureActivity.EXTRA_CARD_INFO, cardInfo);
-            i.putExtra(SignatureActivity.EXTRA_MASKED_CARD_NO, masked);
-            startActivity(i);
+            if (beforeOnline) {
+                // PICC 先确认卡号，确认后联机（completeTransProcess）
+                onConfirmBeforeOnline(amountCent, tipCent, readType, cardInfo, masked);
+            } else if (fromReadCard) {
+                // MAG 先确认卡号，确认后进入联机处理
+                Intent i = new Intent(this, ProcessingActivity.class);
+                i.putExtra(ProcessingActivity.EXTRA_AMOUNT_CENT, amountCent);
+                i.putExtra(ProcessingActivity.EXTRA_TIP_CENT, tipCent);
+                i.putExtra(ProcessingActivity.EXTRA_READ_TYPE, readType);
+                i.putExtra(ProcessingActivity.EXTRA_CARD_INFO, cardInfo);
+                i.putExtra(ProcessingActivity.EXTRA_FROM_CARDHOLDER_CONFIRM, true);
+                startActivity(i);
+            } else {
+                Intent i = new Intent(this, SignatureActivity.class);
+                i.putExtra(SignatureActivity.EXTRA_AMOUNT_CENT, amountCent);
+                i.putExtra(SignatureActivity.EXTRA_TIP_CENT, tipCent);
+                i.putExtra(SignatureActivity.EXTRA_READ_TYPE, readType);
+                i.putExtra(SignatureActivity.EXTRA_CARD_INFO, cardInfo);
+                i.putExtra(SignatureActivity.EXTRA_MASKED_CARD_NO, masked);
+                startActivity(i);
+            }
             finish();
         });
     }
@@ -92,6 +112,19 @@ public class CardholderConfirmActivity extends AppCompatActivity {
         // 兜底：取所有数字的前16位
         String digits = s.replaceAll("\\D", "");
         return digits.length() >= 8 ? digits.substring(0, Math.min(16, digits.length())) : null;
+    }
+
+    private void onConfirmBeforeOnline(long amountCent, long tipCent, int readType, String cardInfo, String masked) {
+        // PICC：确认卡号后进入联机阶段（显示「联机处理中」），Demo 直接视为批准
+        Intent i = new Intent(this, ProcessingActivity.class);
+        i.putExtra(ProcessingActivity.EXTRA_AMOUNT_CENT, amountCent);
+        i.putExtra(ProcessingActivity.EXTRA_TIP_CENT, tipCent);
+        i.putExtra(ProcessingActivity.EXTRA_READ_TYPE, readType);
+        i.putExtra(ProcessingActivity.EXTRA_CARD_INFO, cardInfo);
+        i.putExtra(ProcessingActivity.EXTRA_MASKED_CARD_NO, masked);
+        i.putExtra(ProcessingActivity.EXTRA_FROM_CARDHOLDER_CONFIRM, true);
+        startActivity(i);
+        finish();
     }
 
     private void onCancel() {

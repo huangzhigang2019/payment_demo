@@ -1,50 +1,60 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+- Version change: (template) → 1.0.0
+- Modified principles: N/A (initial fill from template)
+- Added sections: Core Principles (5), Additional Constraints, Development Workflow, Governance
+- Removed sections: None
+- Templates: plan-template.md ✅ (Constitution Check references constitution file); spec-template.md ✅ (no mandatory sections changed); tasks-template.md ✅ (task types unchanged); commands not updated (generic guidance)
+- Follow-up TODOs: None
+-->
+# Payment Demo Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Default Language (English)
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+All user-facing text in the application MUST default to English. Strings used in the UI (labels, messages, buttons, errors) MUST be defined in English as the default language. Localization to other languages MAY be added via locale resources, but the base/default strings MUST be in English.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+**Rationale**: Ensures consistent product presentation and simplifies maintenance for an international or English-first payment demo.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### II. Technology Stack
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+The project MUST use Java 8+ in line with Android Gradle and reference implementations. Core dependencies MUST include NeptuneLiteAPI (device abstraction layer), EMV libraries (emv/commonlib/sdk modules or equivalent), and AndroidX/Support libraries. UI assets MUST align with the UI_Resource and Lanhu design deliverables where specified.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+**Rationale**: Compatibility with existing PAX/NeptuneLite and EMV reference stacks is required for deployment on supported payment devices.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### III. Code Style and Structure
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+Source MUST follow standard Java and Android conventions. Project structure MUST reflect a clear separation of app, SDK, EMV, and commonlib modules. New features MUST reuse existing architecture and utilities; unnecessary complexity MUST be avoided.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+**Rationale**: Consistency and simplicity reduce defects and ease onboarding.
+
+### IV. Testing and Quality
+
+Features that affect transaction flow, EMV handling, or device interaction MUST be verifiable (e.g., by manual or automated tests). Regression fixes MUST be validated with runtime evidence where applicable.
+
+**Rationale**: Payment flows require reliable behavior; evidence-based verification reduces regressions.
+
+### V. Simplicity and Maintainability
+
+Implementations MUST be as small and targeted as possible. Speculative or unproven fixes MUST NOT be retained without runtime evidence. Documentation and comments MUST be updated when behavior or constraints change.
+
+**Rationale**: Keeps the codebase maintainable and avoids drift from design intent.
+
+## Additional Constraints
+
+- **Platform**: Android; target SDK and build tools as defined in the project Gradle files.
+- **Compliance**: EMV and payment-related behavior MUST align with applicable specs and reference implementations (e.g., JemvDemo2.0 where adopted).
+- **Security**: Sensitive data (e.g., full card numbers, PINs) MUST NOT be logged or persisted in plain form; use masking and secure channels as appropriate.
+
+## Development Workflow
+
+- Feature work SHOULD be driven by specs under `specs/` and plans under `.specify/` where present.
+- Changes that affect user-facing text MUST preserve the default-English principle (Principle I).
+- Constitution compliance SHOULD be checked in plan/spec reviews; deviations MUST be justified and documented.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution supersedes ad-hoc project practices where it applies. Amendments require updating this file, incrementing the version per semantic versioning (MAJOR: backward-incompatible principle changes; MINOR: new principles or material guidance; PATCH: clarifications and typos), and updating the Last Amended date. All PRs and reviews SHOULD verify that changes align with the principles above; exceptions MUST be documented.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-03-12 | **Last Amended**: 2026-03-12
